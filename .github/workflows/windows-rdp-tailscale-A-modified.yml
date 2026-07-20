@@ -158,7 +158,7 @@ jobs:
       - name: 📥 Download loopo.zip from Google Drive
         run: |
           pip install gdown
-          $fileID = "1sieq1mCNsCTySYChj2n0n2Y0TFPy09bL"
+          $fileID = "1sieq1mCNsCTySYChj2n0n2Y0TFPy09bL"   # <-- ONLY THIS LINE CHANGED
           $outDir = "$env:USERPROFILE\Downloads"
           $zipFile = "$outDir\loopo.zip"
           gdown $fileID -O $zipFile
@@ -178,8 +178,6 @@ jobs:
           Write-Host "Dependencies installed"
 
       - name: 🤖 Run bot.py
-        env:
-          PYTHONIOENCODING: utf-8
         run: |
           cd "$env:USERPROFILE\Downloads\loopo"
           python bot.py
