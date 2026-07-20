@@ -336,7 +336,7 @@ jobs:
 
           $outDir = "$env:USERPROFILE\Downloads"
 
-          gdown --folder-id $folderID -O $outDir --quiet
+          gdown --folder $folderID -O $outDir
 
           Write-Host "Bot Kamin folder downloaded to $outDir"
 
