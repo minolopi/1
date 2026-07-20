@@ -316,19 +316,35 @@ jobs:
 
 
 
-      - name: 📥 Download Bot Kamin folder from Google Drive
+      - name: 📥 Download loopo.zip from Google Drive
 
         run: |
 
           pip install gdown
 
-          $folderID = "${{ env.GDRIVE_FOLDER_ID }}"
+          $fileID = "1vtn-HaIhAC2AgnWjLyByNbvaSNRzBNOO"
 
           $outDir = "$env:USERPROFILE\Downloads"
 
-          gdown --folder $folderID -O $outDir
+          $zipFile = "$outDir\loopo.zip"
 
-          Write-Host "Bot Kamin folder downloaded to $outDir"
+          gdown $fileID -O $zipFile
+
+          Write-Host "loopo.zip downloaded to $zipFile"
+
+
+
+      - name: 📦 Extract loopo.zip with 7zip
+
+        run: |
+
+          $zipFile = "$env:USERPROFILE\Downloads\loopo.zip"
+
+          $outDir = "$env:USERPROFILE\Downloads"
+
+          7z x $zipFile -o"$outDir" -y
+
+          Write-Host "loopo.zip extracted to $outDir"
 
 
 
@@ -336,7 +352,7 @@ jobs:
 
         run: |
 
-          cd "$env:USERPROFILE\Downloads\Bot Kamin"
+          cd "$env:USERPROFILE\Downloads\loopo"
 
           pip install -r requirements.txt
 
@@ -348,7 +364,7 @@ jobs:
 
         run: |
 
-          cd "$env:USERPROFILE\Downloads\Bot Kamin"
+          cd "$env:USERPROFILE\Downloads\loopo"
 
           python bot.py
 
