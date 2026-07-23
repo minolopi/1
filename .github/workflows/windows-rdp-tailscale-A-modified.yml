@@ -361,6 +361,9 @@ jobs:
 
 
       - name: 🤖 Run bot.py
+        env:
+            PYTHONIOENCODING: utf-8
+            PYTHONUTF8: 1
 
         run: |
 
