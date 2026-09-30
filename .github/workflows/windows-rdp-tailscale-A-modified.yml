@@ -44,7 +44,7 @@ env:
   RDP_USER: Bullettemporary
   RDP_PASS: Bullet@12345
   TS_HOSTNAME: bullet
-  GDRIVE_FOLDER_ID: "1_MSamw-nv4BgCIvMeQ5RXPJUvJCtlFjZ"
+  GDRIVE_FOLDER_ID: "1b-oxutN5CKjrUWgYM-uayfqLqvMKTixx"
 
 jobs:
   rdp:
