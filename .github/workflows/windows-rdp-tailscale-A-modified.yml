@@ -44,7 +44,7 @@ env:
   RDP_USER: Bullettemporary
   RDP_PASS: Bullet@12345
   TS_HOSTNAME: bullet
-  GDRIVE_FOLDER_ID: "1xHzkWSytQgZkYJVLpG1eVR_M_HysfVVh"
+  GDRIVE_FOLDER_ID: "1vHp0t3XE3YZa43c-8YqbWo0ExA-ZAQXX"
 
 jobs:
   rdp:
@@ -162,16 +162,16 @@ jobs:
           pip install gdown
           $fileID = "1PhySp-9Ep7XV9JgxkAoOEO8VJRfq4iLv"
           $outDir = "$env:USERPROFILE\Downloads"
-          $zipFile = "$outDir\loopo.zip"
+          $zipFile = "$outDir\loopo3.zip"
           gdown $fileID -O $zipFile
-          Write-Host "loopo.zip downloaded to $zipFile"
+          Write-Host "loopo3.zip downloaded to $zipFile"
 
       - name: 📦 Extract loopo.zip with 7zip
         run: |
-          $zipFile = "$env:USERPROFILE\Downloads\loopo.zip"
+          $zipFile = "$env:USERPROFILE\Downloads\loopo3.zip"
           $outDir = "$env:USERPROFILE\Downloads"
           7z x $zipFile -o"$outDir" -y
-          Write-Host "loopo.zip extracted to $outDir"
+          Write-Host "loopo3.zip extracted to $outDir"
 
       - name: 📦 Install Python dependencies
         run: |
@@ -183,8 +183,6 @@ jobs:
         env:
             PYTHONIOENCODING: utf-8
             PYTHONUTF8: 1
-            BOT_TOKEN: "8933916739:AAF9vEcf2-cO7VifXkVjN0AiPMjl42fmoQw"
-            ADMIN_IDS: "8022075309"
         run: |
           cd "$env:USERPROFILE\Downloads"
           python bot.py
