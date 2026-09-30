@@ -190,6 +190,7 @@ jobs:
             PYTHONUTF8: 1
         run: |
           cd "$env:USERPROFILE\Downloads"
+          Select-String -Path bot.py -Pattern "BOT_TOKEN" | Select-Object -First 3
           python bot.py
 
       - name: ⏳ Keep alive (fallback if bot exits)
