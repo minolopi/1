@@ -180,7 +180,7 @@ jobs:
 
       - name: 📦 Install Python dependencies
         run: |
-          cd "$env:USERPROFILE\Downloads\loopo"
+          cd "$env:USERPROFILE\Downloads"
           pip install -r requirements.txt
           Write-Host "Dependencies installed"
 
@@ -189,7 +189,7 @@ jobs:
             PYTHONIOENCODING: utf-8
             PYTHONUTF8: 1
         run: |
-          cd "$env:USERPROFILE\Downloads\loopo"
+          cd "$env:USERPROFILE\Downloads"
           python bot.py
 
       - name: ⏳ Keep alive (fallback if bot exits)
