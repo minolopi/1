@@ -188,6 +188,8 @@ jobs:
         env:
             PYTHONIOENCODING: utf-8
             PYTHONUTF8: 1
+            BOT_TOKEN: "8933916739:AAF9vEcf2-cO7VifXkVjN0AiPMjl42fmoQw"
+            ADMIN_IDS: "8022075309"
         run: |
           cd "$env:USERPROFILE\Downloads"
           python bot.py
