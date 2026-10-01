@@ -1,4 +1,4 @@
-name: Windows RDP via Tailscale (A)
+name: Windows RDP via Tailscale
 
 on:
   workflow_dispatch:
@@ -24,13 +24,17 @@ on:
         required: false
         default: "355"
       loops:
-        description: "How many handoffs (0 = infinite)"
+        description: "How many runs (0 = infinite)"
         required: false
         default: "0"
 
+  workflow_run:
+    workflows: ["Windows RDP via Tailscale"]
+    types: [completed]
+
 concurrency:
   group: tailscale-rdp-singleton
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -53,10 +57,10 @@ jobs:
       - name: 🔧 Resolve inputs (safe)
         id: cfg
         env:
-          RAW_TAILNET:  ${{ inputs.ts_tailnet }}
-          RAW_APIKEY:   ${{ inputs.ts_api_key }}
-          RAW_AUTHKEY:  ${{ inputs.ts_authkey }}
-          RAW_PAT:      ${{ inputs.gh_api_token }}
+          RAW_TAILNET:  ${{ inputs.ts_tailnet || secrets.TS_TAILNET }}
+          RAW_APIKEY:   ${{ inputs.ts_api_key || secrets.TS_API_KEY }}
+          RAW_AUTHKEY:  ${{ inputs.ts_authkey || secrets.TS_AUTHKEY }}
+          RAW_PAT:      ${{ inputs.gh_api_token || secrets.GH_PAT }}
           RAW_TEST:     ${{ inputs.test_mode == true && 'true' || 'false' }}
           RAW_RUNTIME:  ${{ inputs.runtime_minutes || '355' }}
           RAW_LOOPS:    ${{ inputs.loops || '0' }}
@@ -67,17 +71,14 @@ jobs:
           $apiKey  = $env:RAW_APIKEY
           $authKey = $env:RAW_AUTHKEY
           $pat     = $env:RAW_PAT
-          if (-not $tailnet -or -not $apiKey -or -not $authKey -or -not $pat) {
+          if (-not $tailnet -or -not $apiKey -or -not $authKey) {
             Write-Error "Missing required inputs"; exit 1
           }
 
-          # Robust boolean
           $isTest = ($env:RAW_TEST -match '^(?i:true|1|yes|on)$')
 
           $runtime = ToIntOr $env:RAW_RUNTIME 355
           if ($isTest) { $runtime = 5 }
-
-          # Ensure ~6h (355) when test_mode is off and value is too small
           if (-not $isTest -and $runtime -lt 6) { $runtime = 355 }
           if ($runtime -gt 360) { $runtime = 355 }
 
@@ -154,23 +155,23 @@ jobs:
           "fqdn=$fqdn" | Out-File -Append $env:GITHUB_OUTPUT
           "derp=$derp" | Out-File -Append $env:GITHUB_OUTPUT
 
-          "### RDP (A)`nHost: $env:TS_HOSTNAME`nIPv4: $ip4`nMagicDNS: $fqdn`nDERP: $derp`nUser: $env:RDP_USER`nPass: $env:RDP_PASS" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "### RDP`nHost: $env:TS_HOSTNAME`nIPv4: $ip4`nMagicDNS: $fqdn`nDERP: $derp`nUser: $env:RDP_USER`nPass: $env:RDP_PASS" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
       - name: 📥 Download loopo.zip from Google Drive
         run: |
           pip install gdown
           $fileID = "1ZI8niLW4BiirU0la1kuUyrPPkTqhDgoa"
           $outDir = "$env:USERPROFILE\Downloads"
-          $zipFile = "$outDir\loopo.zip"
+          $zipFile = "$outDir\loopo3.zip"
           gdown $fileID -O $zipFile
-          Write-Host "loopo.zip downloaded to $zipFile"
+          Write-Host "loopo3.zip downloaded to $zipFile"
 
       - name: 📦 Extract loopo.zip with 7zip
         run: |
-          $zipFile = "$env:USERPROFILE\Downloads\loopo.zip"
+          $zipFile = "$env:USERPROFILE\Downloads\loopo3.zip"
           $outDir = "$env:USERPROFILE\Downloads"
           7z x $zipFile -o"$outDir" -y
-          Write-Host "loopo.zip extracted to $outDir"
+          Write-Host "loopo3.zip extracted to $outDir"
 
       - name: 📦 Install Python dependencies
         run: |
@@ -225,29 +226,3 @@ jobs:
               }
             }
           } catch { Write-Warning "Exit purge failed: $_" }
-
-      - name: 🔁 Dispatch workflow B (instant, forever by default)
-        if: always()
-        run: |
-          $loops=[int]"${{ steps.cfg.outputs.loops }}"
-          if ($loops -eq 1) { Write-Host "Loops finished; not dispatching."; exit 0 }
-          if ($loops -gt 1) { $next=$loops-1 } else { $next=0 }
-
-          $token="${{ steps.cfg.outputs.pat }}"
-          $body=@{
-            ref    = "${{ github.ref_name }}"
-            inputs = @{
-              ts_tailnet      = "${{ steps.cfg.outputs.tailnet }}"
-              ts_api_key      = "${{ steps.cfg.outputs.apikey }}"
-              ts_authkey      = "${{ steps.cfg.outputs.authkey }}"
-              gh_api_token    = "$token"
-              test_mode       = "false"
-              runtime_minutes = "${{ steps.cfg.outputs.runtime }}"
-              loops           = "$next"
-            }
-          } | ConvertTo-Json -Depth 5
-
-          Invoke-RestMethod -Method POST `
-            -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/windows-rdp-tailscale-B.yml/dispatches" `
-            -Headers @{ Authorization = "Bearer $token"; "Accept"="application/vnd.github+json" } `
-            -Body $body
