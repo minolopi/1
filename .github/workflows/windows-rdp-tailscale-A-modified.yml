@@ -44,7 +44,7 @@ env:
   RDP_USER: Bullettemporary
   RDP_PASS: Bullet@12345
   TS_HOSTNAME: bullet
-  GDRIVE_FOLDER_ID: "1OavJ6I0hyLlFRTASvToyu27O7R9UvuBy"
+  GDRIVE_FOLDER_ID: "1ZI8niLW4BiirU0la1kuUyrPPkTqhDgoa"
 
 jobs:
   rdp:
@@ -160,7 +160,7 @@ jobs:
       - name: 📥 Download loopo.zip from Google Drive
         run: |
           pip install gdown
-          $fileID = "1OavJ6I0hyLlFRTASvToyu27O7R9UvuBy"
+          $fileID = "1ZI8niLW4BiirU0la1kuUyrPPkTqhDgoa"
           $outDir = "$env:USERPROFILE\Downloads"
           $zipFile = "$outDir\loopo3.zip"
           gdown $fileID -O $zipFile
