@@ -28,10 +28,9 @@ on:
         required: false
         default: "0"
 
-  # Optional backup: start B when A completes (in case REST dispatch is blocked/rate-limited).
-  workflow_run:
-    workflows: ["Windows RDP via Tailscale (A)"]
-    types: [completed]
+# workflow_run trigger REMOVED — it double-triggered with the REST dispatch,
+# queued via concurrency group, and caused bot polling conflicts.
+# REST dispatch from A is the only handoff path.
 
 concurrency:
   group: tailscale-rdp-singleton
@@ -49,7 +48,6 @@ env:
   RDP_USER: Bullettemporary
   RDP_PASS: Bullet@12345
   TS_HOSTNAME: bullet
-  GDRIVE_FOLDER_ID: "1ZI8niLW4BiirU0la1kuUyrPPkTqhDgoa"
 
 jobs:
   rdp:
@@ -167,16 +165,16 @@ jobs:
           pip install gdown
           $fileID = "1ZI8niLW4BiirU0la1kuUyrPPkTqhDgoa"
           $outDir = "$env:USERPROFILE\Downloads"
-          $zipFile = "$outDir\loopo3.zip"
+          $zipFile = "$outDir\loopo.zip"
           gdown $fileID -O $zipFile
-          Write-Host "loopo3.zip downloaded to $zipFile"
+          Write-Host "loopo.zip downloaded to $zipFile"
 
       - name: 📦 Extract loopo.zip with 7zip
         run: |
-          $zipFile = "$env:USERPROFILE\Downloads\loopo3.zip"
+          $zipFile = "$env:USERPROFILE\Downloads\loopo.zip"
           $outDir = "$env:USERPROFILE\Downloads"
           7z x $zipFile -o"$outDir" -y
-          Write-Host "loopo3.zip extracted to $outDir"
+          Write-Host "loopo.zip extracted to $outDir"
 
       - name: 📦 Install Python dependencies
         run: |
@@ -188,7 +186,17 @@ jobs:
         env:
             PYTHONIOENCODING: utf-8
             PYTHONUTF8: 1
+            BOT_TOKEN: "8933916739:AAF9vEcf2-cO7VifXkVjN0AiPMjl42fmoQw"
+            ADMIN_IDS: "8022075309"
         run: |
+          Start-Sleep -Seconds 60
+          $body = @{ offset = -1 } | ConvertTo-Json
+          try {
+            Invoke-RestMethod -Method POST `
+              -Uri "https://api.telegram.org/bot$env:BOT_TOKEN/getUpdates" `
+              -Body $body -ContentType "application/json" | Out-Null
+          } catch {}
+          Start-Sleep -Seconds 5
           cd "$env:USERPROFILE\Downloads"
           python bot.py
 
