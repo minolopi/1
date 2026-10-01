@@ -28,10 +28,6 @@ on:
         required: false
         default: "0"
 
-  workflow_run:
-    workflows: ["Windows RDP via Tailscale"]
-    types: [completed]
-
 concurrency:
   group: tailscale-rdp-singleton
   cancel-in-progress: true
@@ -71,7 +67,7 @@ jobs:
           $apiKey  = $env:RAW_APIKEY
           $authKey = $env:RAW_AUTHKEY
           $pat     = $env:RAW_PAT
-          if (-not $tailnet -or -not $apiKey -or -not $authKey) {
+          if (-not $tailnet -or -not $apiKey -or -not $authKey -or -not $pat) {
             Write-Error "Missing required inputs"; exit 1
           }
 
@@ -226,3 +222,29 @@ jobs:
               }
             }
           } catch { Write-Warning "Exit purge failed: $_" }
+
+      - name: 🔁 Dispatch next run
+        if: always()
+        run: |
+          $loops=[int]"${{ steps.cfg.outputs.loops }}"
+          if ($loops -eq 1) { Write-Host "Loops finished; not dispatching."; exit 0 }
+          if ($loops -gt 1) { $next=$loops-1 } else { $next=0 }
+
+          $token="${{ steps.cfg.outputs.pat }}"
+          $body=@{
+            ref    = "${{ github.ref_name }}"
+            inputs = @{
+              ts_tailnet      = "${{ steps.cfg.outputs.tailnet }}"
+              ts_api_key      = "${{ steps.cfg.outputs.apikey }}"
+              ts_authkey      = "${{ steps.cfg.outputs.authkey }}"
+              gh_api_token    = "$token"
+              test_mode       = "false"
+              runtime_minutes = "${{ steps.cfg.outputs.runtime }}"
+              loops           = "$next"
+            }
+          } | ConvertTo-Json -Depth 5
+
+          Invoke-RestMethod -Method POST `
+            -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/windows-rdp-tailscale.yml/dispatches" `
+            -Headers @{ Authorization = "Bearer $token"; "Accept"="application/vnd.github+json" } `
+            -Body $body
