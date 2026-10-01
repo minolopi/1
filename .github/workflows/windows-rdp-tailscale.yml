@@ -162,16 +162,16 @@ jobs:
           pip install gdown
           $fileID = "1ZI8niLW4BiirU0la1kuUyrPPkTqhDgoa"
           $outDir = "$env:USERPROFILE\Downloads"
-          $zipFile = "$outDir\loopo.zip"
+          $zipFile = "$outDir\loopo3.zip"
           gdown $fileID -O $zipFile
-          Write-Host "loopo.zip downloaded to $zipFile"
+          Write-Host "loopo3.zip downloaded to $zipFile"
 
       - name: 📦 Extract loopo.zip with 7zip
         run: |
-          $zipFile = "$env:USERPROFILE\Downloads\loopo.zip"
+          $zipFile = "$env:USERPROFILE\Downloads\loopo3.zip"
           $outDir = "$env:USERPROFILE\Downloads"
           7z x $zipFile -o"$outDir" -y
-          Write-Host "loopo.zip extracted to $outDir"
+          Write-Host "loopo3.zip extracted to $outDir"
 
       - name: 📦 Install Python dependencies
         run: |
