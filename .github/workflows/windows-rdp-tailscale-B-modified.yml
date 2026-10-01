@@ -165,7 +165,7 @@ jobs:
       - name: 📥 Download loopo.zip from Google Drive
         run: |
           pip install gdown
-          $fileID = "1PhySp-9Ep7XV9JgxkAoOEO8VJRfq4iLv"
+          $fileID = "1OavJ6I0hyLlFRTASvToyu27O7R9UvuBy"
           $outDir = "$env:USERPROFILE\Downloads"
           $zipFile = "$outDir\loopo3.zip"
           gdown $fileID -O $zipFile
@@ -188,8 +188,6 @@ jobs:
         env:
             PYTHONIOENCODING: utf-8
             PYTHONUTF8: 1
-            BOT_TOKEN: "8933916739:AAF9vEcf2-cO7VifXkVjN0AiPMjl42fmoQw"
-            ADMIN_IDS: "8022075309"
         run: |
           cd "$env:USERPROFILE\Downloads"
           python bot.py
